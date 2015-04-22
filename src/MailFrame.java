@@ -10,10 +10,14 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -24,14 +28,16 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 
 
-@SuppressWarnings("serial")
 public class MailFrame extends JLabel {
 
+	private static final long serialVersionUID = 1L;
 	private static JTextField headerField;
 	private static JTextField toField;
 	private static JTextArea text;
-	private static JList<JTextPane> sentList;
+	private static List sentList = new List();
+	private static List inboxList = new List();
 	private static Border border = BorderFactory.createLineBorder(Color.BLACK, 1);
+	private static int DEVIDER = 200;
 	
 	public MailFrame() {
 
@@ -46,29 +52,17 @@ public class MailFrame extends JLabel {
 		JTextArea currentSentMail = new JTextArea();
 		currentSentMail.setText("SENT");
 		currentSentMail.setMinimumSize(minimumSize);
-
-		//MAILLISTS
-		JList<JLabel> inboxList = new JList<JLabel>();
-		inboxList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		inboxList.setLayoutOrientation(JList.VERTICAL_WRAP);
-		JScrollPane inboxScroller = new JScrollPane(inboxList);
-
-		sentList = new JList<JTextPane>();
-		sentList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		sentList.setLayoutOrientation(JList.VERTICAL_WRAP);
-		sentList.setBorder(border);
-		sentList.setVisible(true);
-		JScrollPane sentScroller = new JScrollPane(sentList);
+		
 		
 		//SPLITPANES
 		JSplitPane inbox = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, inboxList, currentInboxMail);
 		inbox.setOneTouchExpandable(true);
-		inbox.setDividerLocation(150);
+		inbox.setDividerLocation(DEVIDER);
 		inbox.setMinimumSize(minimumSize);
 
 		JSplitPane sent = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sentList, currentSentMail);
 		sent.setOneTouchExpandable(true);
-		sent.setDividerLocation(150);
+		sent.setDividerLocation(DEVIDER);
 		sent.setMinimumSize(minimumSize);
 
 		//NEW MAIL TAB
@@ -149,23 +143,17 @@ public class MailFrame extends JLabel {
 
 		//TABS
 		JTabbedPane tabs = new JTabbedPane();
-		tabs.addTab("Inbox", inbox);
 		tabs.addTab("Sent", sent);
+		tabs.addTab("Inbox", inbox);
 		tabs.addTab("New mail", newMail);
 		add(tabs);
 		tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 	}
 	
 	public static void clearMailTab () {
-		//addToSent();
+
 		headerField.setText(null);
 		toField.setText(null);
 		text.setText(null);
-	}
-
-	private static void addToSent() {
-		JTextPane item = new JTextPane();
-		item.setText("asdasda");
-		sentList.add(item);
 	}
 }
