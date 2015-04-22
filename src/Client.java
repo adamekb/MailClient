@@ -19,6 +19,7 @@ public class Client {
 	private static JFrame frame;
 
 	public static void main(String[] args) throws IOException {
+		frame = new JFrame("Enigma");
 		loginPanel();
 	}
 
@@ -28,8 +29,7 @@ public class Client {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				frame = new JFrame("Enigma");
-				frame.add(new MainFrame());
+				frame.add(new LoginFrame());
 				frame.setVisible(true);
 				frame.pack();
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

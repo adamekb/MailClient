@@ -18,9 +18,9 @@ import javax.swing.border.Border;
 
 
 @SuppressWarnings("serial")
-public class MainFrame extends JLabel {
+public class LoginFrame extends JLabel {
 	
-	public MainFrame() {
+	public LoginFrame() {
 		
 		try {
             setIcon(new ImageIcon(ImageIO.read(getClass().getResource("globe.png"))));
