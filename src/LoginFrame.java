@@ -48,13 +48,13 @@ public class LoginFrame extends JLabel {
 		//TEXT
 		Border border = BorderFactory.createLineBorder(Color.BLACK, 1);
 		
-		JTextField userName = new JTextField(20);
+		final JTextField userName = new JTextField(20);
 		userName.setBorder(border);
 		gbc.gridx = 1;
 		gbc.gridy = 0;
 		add(userName, gbc);
 		
-		JPasswordField password = new JPasswordField(20);
+		final JPasswordField password = new JPasswordField(20);
 		password.setBorder(border);
 		gbc.gridx = 1;
 		gbc.gridy = 1;
