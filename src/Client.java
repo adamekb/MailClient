@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -15,8 +14,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 public class Client {
 
 	private static Socket socket;
-	private static ServerSocket listener;
 	private static JFrame frame;
+	static String userName;
 
 	public static void main(String[] args) throws IOException {
 		frame = new JFrame("Enigma");
@@ -25,8 +24,7 @@ public class Client {
 
 
 
-	public static void loginPanel () {
-
+	private static void loginPanel () {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				frame.add(new LoginFrame());
@@ -45,7 +43,7 @@ public class Client {
 		});
 	}
 
-	public static void mailPanel () {
+	private static void mailPanel () {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				frame.getContentPane().removeAll();
@@ -66,24 +64,12 @@ public class Client {
 		PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 		writer.println(msg);
 
-		listener = new ServerSocket(8080);
-		socket = listener.accept();
 		InputStreamReader reader = new InputStreamReader(socket.getInputStream());
 		BufferedReader input = new BufferedReader(reader);
 
 		parseInput(input);
 
-		closeSockets();
-	}
-
-	private static void closeSockets() {
-
-		try {
-			socket.close();
-			listener.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		socket.close();
 	}
 
 	private static void parseInput(BufferedReader input) {
@@ -92,6 +78,7 @@ public class Client {
 			String i = input.readLine();
 			switch (i) {
 			case "success": 
+				userName = input.readLine();
 				mailPanel();
 				break;
 			case "wrongPwd":

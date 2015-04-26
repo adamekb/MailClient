@@ -36,34 +36,27 @@ public class MailFrame extends JLabel {
 	private static JTextArea text;
 	private static List sentList = new List();
 	private static List inboxList = new List();
+	private static JTextPane currentSentMail = new JTextPane();
+	private static JTextPane currentInboxMail = new JTextPane();
 	private static Border border = BorderFactory.createLineBorder(Color.BLACK, 1);
-	private static int DEVIDER = 200;
+	private int DEVIDER = 170;
 	
 	public MailFrame() {
 
-		Dimension minimumSize = new Dimension(100, 50);
+		//Dimension minimumSize = new Dimension(100, 50);
 		setLayout(new GridLayout());
-
-		//CURRENT MAIL
-		JTextArea currentInboxMail = new JTextArea();
-		currentInboxMail.setText("INBOX");
-		currentInboxMail.setMinimumSize(minimumSize);
-
-		JTextArea currentSentMail = new JTextArea();
-		currentSentMail.setText("SENT");
-		currentSentMail.setMinimumSize(minimumSize);
 		
 		
 		//SPLITPANES
 		JSplitPane inbox = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, inboxList, currentInboxMail);
 		inbox.setOneTouchExpandable(true);
 		inbox.setDividerLocation(DEVIDER);
-		inbox.setMinimumSize(minimumSize);
+		//inbox.setMinimumSize(minimumSize);
 
 		JSplitPane sent = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sentList, currentSentMail);
 		sent.setOneTouchExpandable(true);
 		sent.setDividerLocation(DEVIDER);
-		sent.setMinimumSize(minimumSize);
+		//sent.setMinimumSize(minimumSize);
 
 		//NEW MAIL TAB
 		JLabel newMail = new JLabel();
@@ -151,7 +144,9 @@ public class MailFrame extends JLabel {
 	}
 	
 	public static void clearMailTab () {
-
+		Mail mail = new Mail(toField.getText(), Client.userName, headerField.getText(), text.getText());
+		sentList.addMail(mail, currentSentMail);
+		
 		headerField.setText(null);
 		toField.setText(null);
 		text.setText(null);
