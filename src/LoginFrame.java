@@ -17,9 +17,10 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 
-@SuppressWarnings("serial")
 public class LoginFrame extends JLabel {
 	
+	private static final long serialVersionUID = 1L;
+
 	public LoginFrame() {
 		
 		try {
