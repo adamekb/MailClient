@@ -80,6 +80,7 @@ public class Client {
 			case "success": 
 				userName = input.readLine();
 				mailPanel();
+				getMailboxes(input);
 				break;
 			case "wrongPwd":
 				popupWindow("Wrong password");
@@ -97,6 +98,40 @@ public class Client {
 		}
 	}
 	
+	private static void getMailboxes(BufferedReader input) throws IOException {
+		
+		
+		try {
+			String msg = input.readLine();
+			while (!(msg.equals("done"))) {
+				if (msg.equals("sentMail")) {
+					addSentMail(input.readLine(), input.readLine(), input.readLine(), input.readLine(), input.readLine());
+				} else if (msg.equals("inboxMail")) {
+					addInboxMail(input.readLine(), input.readLine(), input.readLine(), input.readLine(), input.readLine());
+				}
+				msg = input.readLine();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+
+	private static void addInboxMail(String to, String from, String topic,
+			String text, String date) {
+		Mail mail = new Mail(to, from, topic, text, date);
+		MailFrame.inboxList.addMail(mail, MailFrame.currentInboxMailPane, true);
+	}
+
+	private static void addSentMail(String to, String from, String topic,
+			String text, String date) {
+		Mail mail = new Mail(to, from, topic, text, date);
+		MailFrame.sentList.addMail(mail, MailFrame.currentSentMailPane, false);
+	}
+
+
+
 	public static void popupWindow (String msg) {
 		JOptionPane.showMessageDialog(frame, msg);
 	}

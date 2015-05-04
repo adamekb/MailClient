@@ -7,6 +7,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -31,32 +34,29 @@ import javax.swing.border.Border;
 public class MailFrame extends JLabel {
 
 	private static final long serialVersionUID = 1L;
-	private static JTextField headerField;
+	private static JTextField topicField;
 	private static JTextField toField;
 	private static JTextArea text;
-	private static List sentList = new List();
-	private static List inboxList = new List();
-	private static JTextPane currentSentMail = new JTextPane();
-	private static JTextPane currentInboxMail = new JTextPane();
+	static List sentList = new List();
+	static List inboxList = new List();
+	static JTextPane currentSentMailPane = new JTextPane();
+	static JTextPane currentInboxMailPane = new JTextPane();
 	private static Border border = BorderFactory.createLineBorder(Color.BLACK, 1);
 	private int DEVIDER = 170;
+	static Mail currentMail;
 	
 	public MailFrame() {
 
-		//Dimension minimumSize = new Dimension(100, 50);
 		setLayout(new GridLayout());
 		
-		
 		//SPLITPANES
-		JSplitPane inbox = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, inboxList, currentInboxMail);
+		JSplitPane inbox = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, inboxList, currentInboxMailPane);
 		inbox.setOneTouchExpandable(true);
 		inbox.setDividerLocation(DEVIDER);
-		//inbox.setMinimumSize(minimumSize);
 
-		JSplitPane sent = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sentList, currentSentMail);
+		JSplitPane sent = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sentList, currentSentMailPane);
 		sent.setOneTouchExpandable(true);
 		sent.setDividerLocation(DEVIDER);
-		//sent.setMinimumSize(minimumSize);
 
 		//NEW MAIL TAB
 		JLabel newMail = new JLabel();
@@ -84,11 +84,11 @@ public class MailFrame extends JLabel {
 		newMail.add(to, gbc);
 
 		//TEXT FIELDS
-		headerField = new JTextField(50);
-		headerField.setBorder(border);
+		topicField = new JTextField(50);
+		topicField.setBorder(border);
 		gbc.gridx = 1;
 		gbc.gridy = 1;
-		newMail.add(headerField, gbc);
+		newMail.add(topicField, gbc);
 
 		toField = new JTextField(50);
 		toField.setBorder(border);
@@ -118,7 +118,7 @@ public class MailFrame extends JLabel {
 			public void actionPerformed(ActionEvent arg0) {
 				if (toField.getText().length() == 0) {
 					Client.popupWindow("Enter recipient");
-				} else if (headerField.getText().length() == 0) {
+				} else if (topicField.getText().length() == 0) {
 					Client.popupWindow("Enter topic");
 				} else if (text.getText().length() == 0) {
 					Client.popupWindow("Cannot send empty mail");
@@ -126,7 +126,10 @@ public class MailFrame extends JLabel {
 					Client.popupWindow("Mail too long");
 				} else {
 					try {
-						Client.send("sendMail\n" + toField.getText() + "\n" + headerField.getText() + "\n" + text.getText() + "\n");
+						DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+						String date = dateFormat.format(new Date());
+						Client.send("sendMail\n" + toField.getText() + "\n" + Client.userName + 
+								"\n" + topicField.getText() + "\n" + text.getText() + "\n" + date);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -144,10 +147,11 @@ public class MailFrame extends JLabel {
 	}
 	
 	public static void clearMailTab () {
-		Mail mail = new Mail(toField.getText(), Client.userName, headerField.getText(), text.getText());
-		sentList.addMail(mail, currentSentMail);
-		
-		headerField.setText(null);
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		String date = dateFormat.format(new Date());
+		currentMail = new Mail(toField.getText(), Client.userName, topicField.getText(), text.getText(), date);
+		sentList.addMail(currentMail, currentSentMailPane, false);
+		topicField.setText(null);
 		toField.setText(null);
 		text.setText(null);
 	}
