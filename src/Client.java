@@ -60,7 +60,7 @@ public class Client {
 
 	public static void send(String msg) throws UnknownHostException, IOException {
 
-		socket = new Socket("Adam", 9090);
+		socket = new Socket("172.20.10.6", 9090);
 		PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 		writer.println(msg);
 

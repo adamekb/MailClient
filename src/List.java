@@ -26,7 +26,7 @@ public class List extends JLabel {
 		
 	}
 	
-	public void addMail (Mail mail, JTextPane currentMail, Boolean inbox) {
+	public void addMail (final Mail mail, final JTextPane currentMailPane, Boolean inbox) {
 		JButton button = null;
 		if (inbox) {
 			button = new JButton(mail.from + "  " + mail.date);
@@ -37,8 +37,8 @@ public class List extends JLabel {
 		button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				currentMail.setFont(new Font("Verdana", Font.BOLD, 14));
-				currentMail.setText(mail.topic + "\n\n" + mail.text);
+				currentMailPane.setFont(new Font("Verdana", Font.PLAIN, 14));
+				currentMailPane.setText(mail.topic + "\n\n" + mail.text);
 			}
 		});
 	}

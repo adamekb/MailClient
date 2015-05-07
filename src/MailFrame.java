@@ -7,10 +7,15 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -42,7 +47,7 @@ public class MailFrame extends JLabel {
 	static JTextPane currentSentMailPane = new JTextPane();
 	static JTextPane currentInboxMailPane = new JTextPane();
 	private static Border border = BorderFactory.createLineBorder(Color.BLACK, 1);
-	private int DEVIDER = 170;
+	private int DEVIDER = 235;
 	static Mail currentMail;
 	
 	public MailFrame() {
@@ -126,11 +131,12 @@ public class MailFrame extends JLabel {
 					Client.popupWindow("Mail too long");
 				} else {
 					try {
+						AesEncryption msg = new AesEncryption(text.getText());
 						DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 						String date = dateFormat.format(new Date());
 						Client.send("sendMail\n" + toField.getText() + "\n" + Client.userName + 
-								"\n" + topicField.getText() + "\n" + text.getText() + "\n" + date);
-					} catch (IOException e) {
+								"\n" + topicField.getText() + "\n" + msg.getEncryptedMsg() + "\n" + date);
+					} catch (IOException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException e) {
 						e.printStackTrace();
 					}
 				}
