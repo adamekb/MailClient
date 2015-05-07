@@ -60,7 +60,7 @@ public class Client {
 
 	public static void send(String msg) throws UnknownHostException, IOException {
 
-		socket = new Socket("172.20.10.6", 9090);
+		socket = new Socket("adam", 9090);
 		PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 		writer.println(msg);
 
@@ -100,7 +100,6 @@ public class Client {
 	
 	private static void getMailboxes(BufferedReader input) throws IOException {
 		
-		
 		try {
 			String msg = input.readLine();
 			while (!(msg.equals("done"))) {
@@ -120,13 +119,13 @@ public class Client {
 
 	private static void addInboxMail(String to, String from, String topic,
 			String text, String date) {
-		Mail mail = new Mail(to, from, topic, text, date);
+		Mail mail = new Mail(to, from, topic, Aes.Decrypt(text), date);
 		MailFrame.inboxList.addMail(mail, MailFrame.currentInboxMailPane, true);
 	}
 
 	private static void addSentMail(String to, String from, String topic,
 			String text, String date) {
-		Mail mail = new Mail(to, from, topic, text, date);
+		Mail mail = new Mail(to, from, topic, Aes.Decrypt(text), date);
 		MailFrame.sentList.addMail(mail, MailFrame.currentSentMailPane, false);
 	}
 

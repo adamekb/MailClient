@@ -47,7 +47,7 @@ public class MailFrame extends JLabel {
 	static JTextPane currentSentMailPane = new JTextPane();
 	static JTextPane currentInboxMailPane = new JTextPane();
 	private static Border border = BorderFactory.createLineBorder(Color.BLACK, 1);
-	private int DEVIDER = 235;
+	private int DEVIDER = 170; //mac: 235 pc: 170
 	static Mail currentMail;
 	
 	public MailFrame() {
@@ -131,12 +131,11 @@ public class MailFrame extends JLabel {
 					Client.popupWindow("Mail too long");
 				} else {
 					try {
-						AesEncryption msg = new AesEncryption(text.getText());
 						DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 						String date = dateFormat.format(new Date());
 						Client.send("sendMail\n" + toField.getText() + "\n" + Client.userName + 
-								"\n" + topicField.getText() + "\n" + msg.getEncryptedMsg() + "\n" + date);
-					} catch (IOException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException e) {
+								"\n" + topicField.getText() + "\n" + Aes.Encrypt(text.getText()) + "\n" + date);
+					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
