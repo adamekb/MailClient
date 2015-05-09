@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -8,42 +9,43 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SealedObject;
+
+import org.apache.commons.codec.binary.Base64;
 
 
 public class Rsa {
-	
-	public void hej () {
-		
+	static KeyPairGenerator generator;
+
+	public static KeyPair generateNewKeys () {
 		try {
-			// Get an instance of the RSA key generator
-			KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-			// Generate the keys — might take sometime on slow computers
-			KeyPair myPair = kpg.generateKeyPair();
-			
-			// Get an instance of the Cipher for RSA encryption/decryption
-			Cipher c = Cipher.getInstance("RSA");
-			// Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
-			c.init(Cipher.ENCRYPT_MODE, myPair.getPublic()); 
-			
-			// Create a secret message
-			String myMessage = new String("Secret Message");
-			// Encrypt that message using a new SealedObject and the Cipher we created before
-			SealedObject myEncryptedMessage = new SealedObject( myMessage, c);
-			
-			// Get an instance of the Cipher for RSA encryption/decryption
-			Cipher dec = Cipher.getInstance("RSA");
-			// Initiate the Cipher, telling it that it is going to Decrypt, giving it the private key
-			dec.init(Cipher.DECRYPT_MODE, myPair.getPrivate());
-			
-			// Tell the SealedObject we created before to decrypt the data and return it
-			String message = (String) myEncryptedMessage.getObject(dec);
-			System.out.println("foo = "  + message);
-		} catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | IllegalBlockSizeException | IOException | ClassNotFoundException | BadPaddingException e) {
-			// TODO Auto-generated catch block
+			generator = KeyPairGenerator.getInstance("RSA");
+		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
-		
+		return generator.generateKeyPair();
 	}
 	
+	public static String encrypt (String msg, Key key) {
+		String encryptedString = null;
+		try {
+			Cipher c = Cipher.getInstance("RSA");
+			c.init(Cipher.ENCRYPT_MODE, key); 
+			encryptedString = Base64.encodeBase64String(c.doFinal(msg.getBytes("UTF-8")));
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | IOException | BadPaddingException e) {
+			e.printStackTrace();
+		}
+		return encryptedString;
+	}
+
+	public static String decrypt (String msg, Key key) {
+		String decryptedString = null;
+		try {
+			Cipher c = Cipher.getInstance("RSA");
+			c.init(Cipher.DECRYPT_MODE, key);
+			decryptedString = new String(c.doFinal(Base64.decodeBase64(msg)));
+		} catch (IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
+			e.printStackTrace();
+		}
+		return decryptedString;
+	}
 }
