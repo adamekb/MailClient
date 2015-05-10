@@ -133,9 +133,9 @@ public class MailFrame extends JLabel {
 					try {
 						DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 						String date = dateFormat.format(new Date());
-						Client.send("sendMail\n" + toField.getText() + "\n" + Client.userName + 
+						Client.send("sendMail\n" + toField.getText() + "\n" + LoginFrame.userName + 
 								"\n" + topicField.getText() + "\n" + Aes.Encrypt(text.getText()) + "\n" + date);
-					} catch (IOException e) {
+					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
@@ -154,7 +154,7 @@ public class MailFrame extends JLabel {
 	public static void clearMailTab () {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		String date = dateFormat.format(new Date());
-		currentMail = new Mail(toField.getText(), Client.userName, topicField.getText(), text.getText(), date);
+		currentMail = new Mail(toField.getText(), LoginFrame.userName, topicField.getText(), text.getText(), date);
 		sentList.addMail(currentMail, currentSentMailPane, false);
 		topicField.setText(null);
 		toField.setText(null);

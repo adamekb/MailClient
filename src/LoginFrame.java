@@ -6,6 +6,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -20,7 +21,9 @@ import javax.swing.border.Border;
 public class LoginFrame extends JLabel {
 	
 	private static final long serialVersionUID = 1L;
-
+	public static char[] pwdArray;
+	public static String userName;
+	
 	public LoginFrame() {
 		
 		try {
@@ -49,11 +52,11 @@ public class LoginFrame extends JLabel {
 		//TEXT
 		Border border = BorderFactory.createLineBorder(Color.BLACK, 1);
 		
-		final JTextField userName = new JTextField(20);
-		userName.setBorder(border);
+		final JTextField uName = new JTextField(20);
+		uName.setBorder(border);
 		gbc.gridx = 1;
 		gbc.gridy = 0;
-		add(userName, gbc);
+		add(uName, gbc);
 		
 		final JPasswordField password = new JPasswordField(20);
 		password.setBorder(border);
@@ -72,14 +75,16 @@ public class LoginFrame extends JLabel {
 		loginButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if (userName.getText().length() == 0) {
+				pwdArray = password.getPassword();
+				userName = uName.getText();
+				if (userName.length() == 0) {
 					Client.popupWindow("Enter user name");
-				} else if (password.getText().length() == 0) {
+				} else if (pwdArray.length == 0) {
 					Client.popupWindow("Enter password");
 				} else {
 					try {
-						Client.send("login\n" + userName.getText() + "\n" + password.getText());
-					} catch (IOException e) {
+						Client.send("requestServerKey\n");
+					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
@@ -87,5 +92,9 @@ public class LoginFrame extends JLabel {
 			}
 			
 		});
+	}
+	
+	public static void clearPwdArray() {
+		Arrays.fill(pwdArray, '\u0000');
 	}
 }
