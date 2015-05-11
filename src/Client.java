@@ -65,10 +65,10 @@ public class Client {
 	public static void send(String msg) 
 			throws UnknownHostException, IOException, InterruptedException {
 
-		socket = new Socket("adam", 9090);
+		socket = new Socket("192.168.1.99", 9090);
 		PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 		writer.println(msg);
-		Thread.sleep(1000);
+
 		InputStreamReader reader = new InputStreamReader(socket.getInputStream());
 		BufferedReader input = new BufferedReader(reader);
 
