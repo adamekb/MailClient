@@ -7,32 +7,24 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
 import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 
 
@@ -131,11 +123,13 @@ public class MailFrame extends JLabel {
 					Client.popupWindow("Mail too long");
 				} else {
 					try {
+						String to = toField.getText();
+						SecretKeySpec aesKey = Client.getAesKey(to);
 						DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 						String date = dateFormat.format(new Date());
-						Client.send("sendMail\n" + toField.getText() + "\n" + LoginFrame.userName + 
-								"\n" + topicField.getText() + "\n" + Aes.Encrypt(text.getText()) + "\n" + date);
-					} catch (IOException | InterruptedException e) {
+						Client.send("sendMail\n" + to + "\n" + LoginFrame.userName + 
+								"\n" + Aes.encrypt(topicField.getText(), aesKey) + "\n" + Aes.encrypt(text.getText(), aesKey) + "\n" + date);
+					} catch (IOException | InterruptedException | NoSuchAlgorithmException | InvalidKeySpecException e) {
 						e.printStackTrace();
 					}
 				}

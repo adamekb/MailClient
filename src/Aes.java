@@ -4,9 +4,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 
 public class Aes {
-	static SecretKeySpec secretKey = new SecretKeySpec("qwertyuiopasdfgh".getBytes(), "AES");
-	
-	public static String Encrypt (String msg) {
+
+	public static String encrypt (String msg, SecretKeySpec secretKey) {
 		String encryptedString = null;
 		try {
 			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
@@ -19,7 +18,7 @@ public class Aes {
 		return encryptedString;
 	}
 	
-	public static String Decrypt (String msg) {
+	public static String decrypt (String msg, SecretKeySpec secretKey) {
 		String decryptedString = null;
 		try {
 			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");

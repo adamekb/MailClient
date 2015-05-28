@@ -8,12 +8,19 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.Key;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import org.apache.commons.codec.binary.Base64;
 
 public class Client {
 
@@ -21,9 +28,12 @@ public class Client {
 	private static JFrame frame;
 	private static FileWriter keyWriter;
 	private static Key privateKey, publicKey;
-	static Key receivedKey;
+	private static String serverIp = "asd";
+	static ArrayList<Contact> contacts = new ArrayList<Contact>();
+	static Key serverPublicKey;
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) 
+			throws IOException {
 		frame = new JFrame("Enigma");
 		loginPanel();
 	}
@@ -63,9 +73,9 @@ public class Client {
 	}
 
 	public static void send(String msg) 
-			throws UnknownHostException, IOException, InterruptedException {
+			throws UnknownHostException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
 
-		socket = new Socket("192.168.1.99", 9090);
+		socket = new Socket(serverIp, 9090);
 		PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 		writer.println(msg);
 
@@ -76,17 +86,18 @@ public class Client {
 		socket.close();
 	}
 
-	private static void parseInput(BufferedReader input) {
+	private static void parseInput(BufferedReader input) 
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
 
 		try {
 			String i = input.readLine();
-			
+
 			switch (i) {
 			case "serverKey":
 				String key = input.readLine();
-				receivedKey = Rsa.stringToPublicKey(key);
-				send("login\n" + Rsa.encrypt(LoginFrame.userName, receivedKey) + 
-						"\n" + Rsa.encryptPassword(LoginFrame.pwdArray, receivedKey));
+				serverPublicKey = Rsa.stringToPublicKey(key);
+				send("login\n" + Rsa.encrypt(LoginFrame.userName, serverPublicKey) + 
+						"\n" + Rsa.encryptPassword(LoginFrame.pwdArray, serverPublicKey));
 				LoginFrame.clearPwdArray();
 				break;
 			case "success": 
@@ -105,14 +116,57 @@ public class Client {
 				popupWindow("Mail sent");
 				MailFrame.clearMailTab();
 				break;
+			case "publicKey":
+				String name = input.readLine();
+				String signature = input.readLine();
+				if (validateSignature(name, signature)) {
+					String publicKey = input.readLine();
+					addNewContact(name, publicKey); 
+				}
+				break;
+			case "aesAdded":
+				break;
 			}
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	private static void getMailboxes(BufferedReader input) throws IOException {
-		
+
+	private static boolean validateSignature(String name, String signature) {
+		String decryptedSignature = Rsa.decrypt(signature, serverPublicKey);
+		return name.equals(decryptedSignature);
+	}
+
+	private static void addNewContact(String name, String publicKey) 
+			throws NoSuchAlgorithmException, UnknownHostException, InvalidKeySpecException, IOException, InterruptedException {
+		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+		keyGen.init(256);
+		SecretKeySpec aesKey = (SecretKeySpec) KeyGenerator.getInstance("AES").generateKey();
+		String encodedKey = Base64.encodeBase64String(aesKey.getEncoded());
+
+		send("giveAesKey\n" + name + "\n" + LoginFrame.userName + "\n" + Rsa.encrypt(LoginFrame.userName, privateKey) + "\n" + Rsa.encrypt(encodedKey, Rsa.stringToPublicKey(publicKey)) + "\n" + Rsa.encrypt(encodedKey, Client.publicKey));
+
+		contacts.add(new Contact(name, Rsa.stringToPublicKey(publicKey), aesKey));
+	}
+
+	private static void addNewContact(String contactInfo) {
+		String[] array = contactInfo.split(" ");
+		String name = array[0];
+		String encryptedAesKey = array[1];
+		String stringPublicKey = array[2];
+
+		Key publicKey = Rsa.stringToPublicKey(stringPublicKey);
+
+		String stringAesKey = Rsa.decrypt(encryptedAesKey, privateKey);
+		byte[] decodedKey = Base64.decodeBase64(stringAesKey);
+		SecretKeySpec aesKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+
+		contacts.add(new Contact(name, publicKey, aesKey));
+	}
+
+	private static void getMailboxes(BufferedReader input) 
+			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InterruptedException {
+
 		try {
 			String msg = input.readLine();
 			while (!(msg.equals("done"))) {
@@ -120,6 +174,9 @@ public class Client {
 					addSentMail(input.readLine(), input.readLine(), input.readLine(), input.readLine(), input.readLine());
 				} else if (msg.equals("inboxMail")) {
 					addInboxMail(input.readLine(), input.readLine(), input.readLine(), input.readLine(), input.readLine());
+				} else if (msg.equals("newContact")) {
+					String newContact = input.readLine();
+					addNewContact(newContact);
 				}
 				msg = input.readLine();
 			}
@@ -129,14 +186,16 @@ public class Client {
 	}
 
 	private static void addInboxMail(String to, String from, String topic,
-			String text, String date) {
-		Mail mail = new Mail(to, from, topic, Aes.Decrypt(text), date);
+			String text, String date) throws UnknownHostException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, InterruptedException {
+		SecretKeySpec aesKey = getAesKey(from);
+		Mail mail = new Mail(to, from, Aes.decrypt(topic, aesKey), Aes.decrypt(text, aesKey), date);
 		MailFrame.inboxList.addMail(mail, MailFrame.currentInboxMailPane, true);
 	}
 
 	private static void addSentMail(String to, String from, String topic,
-			String text, String date) {
-		Mail mail = new Mail(to, from, topic, Aes.Decrypt(text), date);
+			String text, String date) throws UnknownHostException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, InterruptedException {
+		SecretKeySpec aesKey = getAesKey(to);
+		Mail mail = new Mail(to, from, Aes.decrypt(topic, aesKey), Aes.decrypt(text, aesKey), date);
 		MailFrame.sentList.addMail(mail, MailFrame.currentSentMailPane, false);
 	}
 
@@ -144,6 +203,10 @@ public class Client {
 		JOptionPane.showMessageDialog(frame, msg);
 	}
 	
+	public static void changeIp () {
+		serverIp = JOptionPane.showInputDialog(frame, "Enter ip", "IP configuration", JOptionPane.PLAIN_MESSAGE);
+	}
+
 	private static void loadKeys(String fileName) 
 			throws IOException {
 		keyWriter = new FileWriter(fileName, true);
@@ -163,8 +226,30 @@ public class Client {
 		KeyPair newKeys = Rsa.generateNewKeys();
 		Key privateKey = newKeys.getPrivate();
 		Key publicKey = newKeys.getPublic();
-		
+
 		keyWriter.write(Rsa.keyToString(privateKey) + "\n" + Rsa.keyToString(publicKey) + "\n");
 		keyWriter.close();
+	}
+
+	public static SecretKeySpec getAesKey(String name) 
+			throws UnknownHostException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, InterruptedException {
+		SecretKeySpec aesKey = null;
+		for (Contact i : contacts) {
+			if (i.getUserName().equals(name)) {
+				aesKey = i.getAesKey();
+			}
+		}
+
+		if (aesKey == null) {
+			send("addContact\n" + name);
+			Thread.sleep(200);
+
+			for (Contact i : contacts) {
+				if (i.getUserName().equals(name)) {
+					aesKey = i.getAesKey();
+				}
+			}
+		}
+		return aesKey;
 	}
 }

@@ -6,6 +6,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import javax.imageio.ImageIO;
@@ -65,12 +67,23 @@ public class LoginFrame extends JLabel {
 		add(password, gbc);
 		
 		
-		//BUTTON
+		//BUTTONS
 		JButton loginButton = new JButton("Login");
 		gbc.gridx = 1;
 		gbc.gridy = 3;
 		add(loginButton, gbc);
 		loginButton.setPreferredSize(new Dimension(70, 30));
+		
+		JButton ipButton = new JButton("IP");
+		gbc.gridx = 2;
+		gbc.gridy = 0;
+		gbc.gridheight = 2;
+//		gbc.ipady = 0;
+//		gbc.insets = new Insets(10,0,0,0); 
+//		gbc.anchor = GridBagConstraints.PAGE_END;
+//		gbc.fill = GridBagConstraints.HORIZONTAL;
+		add(ipButton, gbc);
+		ipButton.setPreferredSize(new Dimension(50, 30));
 		
 		loginButton.addActionListener(new ActionListener() {
 			@Override
@@ -84,13 +97,20 @@ public class LoginFrame extends JLabel {
 				} else {
 					try {
 						Client.send("requestServerKey\n");
-					} catch (IOException | InterruptedException e) {
+					} catch (IOException | InterruptedException | NoSuchAlgorithmException | InvalidKeySpecException e) {
 						e.printStackTrace();
 					}
 				}
 
 			}
 			
+		});
+		
+		ipButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Client.changeIp();
+			}
 		});
 	}
 	

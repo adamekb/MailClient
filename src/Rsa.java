@@ -34,7 +34,11 @@ public class Rsa {
 		}
 		return generator.generateKeyPair();
 	}
-
+	
+	public static String encrypt (char[] msg, Key key) {
+		return encrypt(msg.toString(), key);
+	}
+	
 	public static String encrypt (String msg, Key key) {
 		String encryptedString = null;
 		try {
