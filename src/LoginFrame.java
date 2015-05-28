@@ -21,70 +21,67 @@ import javax.swing.border.Border;
 
 
 public class LoginFrame extends JLabel {
-	
+
 	private static final long serialVersionUID = 1L;
 	public static char[] pwdArray;
 	public static String userName;
-	
+
 	public LoginFrame() {
-		
+
 		try {
-            setIcon(new ImageIcon(ImageIO.read(getClass().getResource("globe.png"))));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-		
+			setIcon(new ImageIcon(ImageIO.read(getClass().getResource("globe.png"))));
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(1, 1, 1, 1);
 		setLayout(new GridBagLayout());
-		
+
 		//LABEL
 		JLabel userLabel = new JLabel("User name: ");
 		userLabel.setForeground(Color.WHITE);
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		add(userLabel, gbc);
-		
+
 		JLabel passLabel = new JLabel("Password: ");
 		passLabel.setForeground(Color.WHITE);
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		add(passLabel, gbc);
-		
+
 		//TEXT
 		Border border = BorderFactory.createLineBorder(Color.BLACK, 1);
-		
+
 		final JTextField uName = new JTextField(20);
 		uName.setBorder(border);
+		gbc.gridwidth = 2;
 		gbc.gridx = 1;
 		gbc.gridy = 0;
 		add(uName, gbc);
-		
+
 		final JPasswordField password = new JPasswordField(20);
 		password.setBorder(border);
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		add(password, gbc);
-		
-		
+
+
 		//BUTTONS
 		JButton loginButton = new JButton("Login");
+		gbc.gridwidth = 1;
 		gbc.gridx = 1;
-		gbc.gridy = 3;
+		gbc.gridy = 2;
 		add(loginButton, gbc);
-		loginButton.setPreferredSize(new Dimension(70, 30));
-		
-		JButton ipButton = new JButton("IP");
+		loginButton.setPreferredSize(new Dimension(110, 30));
+
+		JButton ipButton = new JButton("Change IP");
 		gbc.gridx = 2;
-		gbc.gridy = 0;
-		gbc.gridheight = 2;
-//		gbc.ipady = 0;
-//		gbc.insets = new Insets(10,0,0,0); 
-//		gbc.anchor = GridBagConstraints.PAGE_END;
-//		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.gridy = 2;
 		add(ipButton, gbc);
-		ipButton.setPreferredSize(new Dimension(50, 30));
-		
+		ipButton.setPreferredSize(new Dimension(110, 30));
+
 		loginButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -94,6 +91,8 @@ public class LoginFrame extends JLabel {
 					Client.popupWindow("Enter user name");
 				} else if (pwdArray.length == 0) {
 					Client.popupWindow("Enter password");
+				} else if (Client.serverIp == null) {
+					Client.popupWindow("Enter ip");
 				} else {
 					try {
 						Client.send("requestServerKey\n");
@@ -103,17 +102,21 @@ public class LoginFrame extends JLabel {
 				}
 
 			}
-			
+
 		});
-		
+
 		ipButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				Client.changeIp();
+				try {
+					Client.changeIp();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		});
 	}
-	
+
 	public static void clearPwdArray() {
 		Arrays.fill(pwdArray, '\u0000');
 	}

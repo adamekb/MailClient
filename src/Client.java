@@ -28,13 +28,15 @@ public class Client {
 	private static JFrame frame;
 	private static FileWriter keyWriter;
 	private static Key privateKey, publicKey;
-	private static String serverIp = "asd";
+	private static FileWriter ipWriter;
 	static ArrayList<Contact> contacts = new ArrayList<Contact>();
+	static String serverIp;
 	static Key serverPublicKey;
 
 	public static void main(String[] args) 
 			throws IOException {
 		frame = new JFrame("Enigma");
+		setIp();
 		loginPanel();
 	}
 
@@ -203,8 +205,12 @@ public class Client {
 		JOptionPane.showMessageDialog(frame, msg);
 	}
 	
-	public static void changeIp () {
+	public static void changeIp () throws IOException {
 		serverIp = JOptionPane.showInputDialog(frame, "Enter ip", "IP configuration", JOptionPane.PLAIN_MESSAGE);
+		ipWriter = new FileWriter("ip.txt", true);
+		ipWriter.flush();
+		ipWriter.write(serverIp);
+		ipWriter.close();
 	}
 
 	private static void loadKeys(String fileName) 
@@ -251,5 +257,16 @@ public class Client {
 			}
 		}
 		return aesKey;
+	}
+	
+	private static void setIp() throws IOException {
+		ipWriter = new FileWriter("ip.txt", true);
+		ipWriter.close();
+		BufferedReader reader = new BufferedReader(new FileReader("ip.txt"));
+		String line = null;
+		if ((line = reader.readLine()) != null) {
+			serverIp = line;
+		}
+		reader.close();
 	}
 }
